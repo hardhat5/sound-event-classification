@@ -1,0 +1,9 @@
+audioset/data/logmelspec/*
+audioset/data/cqt/*
+audioset/data/gammatone/*
+dcase/data/logmelspec/*
+dcase/data/cqt/*
+dcase/data/gammatone/*
+dcase/data/train/*
+dcase/data/validate/*
+

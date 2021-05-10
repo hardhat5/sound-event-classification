@@ -1,1 +1,1 @@
-# sound-event-classification
+# Sound Event Classification
