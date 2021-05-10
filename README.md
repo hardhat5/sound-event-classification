@@ -11,17 +11,18 @@ Each dataset has its own folder and contains the following subfolders:
 Other than these subfolders, each dataset folder contains a script `statistics.py` to evaluate the channel wise mean and standard deviation for the various features. 
 
 ## Datasets
-### DCASE
-This is the Urban Sound Tagging dataset from DCASE 2019 Task 5. 
+### A. DCASE
+This is the Urban Sound Tagging dataset from DCASE 2019 Task 5. It contains one training split and one validation split. 
+### B. Audioset
+This is a subset of Audioset containing 10 classes. It is split into 5 different folds for 5-fold cross validation. 
 
 ## Reproducing the results
 To reproduce the results, first clone this repository. Then, follow the steps below. 
 ### 1. Generating the features
 Generate the required type of feature using the following <br/>
-For logmel: `python compute_logmel.py ./dcase/data/train ./dcase/data/logmelspec`<br/>
-For gammatone: `python compute_gammatone.py ./dcase/data/train ./dcase/data/gammatone`<br/>
-For CQT: `python compute_cqt.py ./dcase/data/train ./dcase/data/cqt`<br/>
-For audioset, replace "dcase" in the above commands with "audioset". The audio files can be stored anywhere but the features must be stored in the subfolders mentioned above.
+`python compute_<feature_type>.py <input_path> <output_path>
+Replace `<feature_type>` with one of `logmelspec`, `cqt`, `gammatone`. The output path has to be `./<dataset>/data/<feature_type>` where `<dataset>` is one of `dcase` or `audioset`. 
+
 ### 2. Evaluating channel wise mean and standard deviation
 Evaluate the channel wise mean and standard deviation for the features using `statistics.py`. 
 #### DCASE
