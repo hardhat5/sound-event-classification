@@ -20,7 +20,7 @@ This is a subset of Audioset containing 10 classes. It is split into 5 different
 To reproduce the results, first clone this repository. Then, follow the steps below. 
 ### 1. Generating the features
 Generate the required type of feature using the following <br/>
-`python compute_<feature_type>.py <input_path> <output_path>
+`python compute_<feature_type>.py <input_path> <output_path>`
 Replace `<feature_type>` with one of `logmelspec`, `cqt`, `gammatone`. The output path has to be `./<dataset>/data/<feature_type>` where `<dataset>` is one of `dcase` or `audioset`. 
 
 ### 2. Evaluating channel wise mean and standard deviation
