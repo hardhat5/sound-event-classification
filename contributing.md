@@ -13,6 +13,6 @@ An average contribution would involve the following:
   - `git fetch upstream main`
   - `git reset --hard FETCH_HEAD`
   - `git checkout my-feature`
-  - `git rebase main
+  - `git rebase main`
 8. Resolve any merge conflicts, and then push the branch with `git push origin my-feature`.
 9. Create a Pull Request detailing the changes you made and wait for review/merge.
