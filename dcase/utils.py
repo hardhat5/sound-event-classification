@@ -71,6 +71,9 @@ class AudioDataset(Dataset):
         sample = sample.T
         sample = (sample-self.channel_means)/self.channel_stds
         sample = torch.Tensor(sample)
+
+        if self.spec_transform:
+            sample = self.spec_transform(sample)
         
         if self.image_transform:
             # min-max transformation
