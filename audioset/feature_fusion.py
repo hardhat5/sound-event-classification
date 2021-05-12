@@ -128,7 +128,7 @@ def main(perm):
    
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Feature Combination')
-    parser.add_argument('--permutation', '--arg', nargs='+', type=int)
+    parser.add_argument('-p', '--permutation', '--arg', nargs='+', type=int, default=[0,1,2,3,4])
     args = parser.parse_args()
     
     main(args.permutation)
