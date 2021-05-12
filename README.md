@@ -45,5 +45,6 @@ For validation, run `evaluate.py` with the same arguments as above but without t
 ### 6. Feature Fusion
 In order to perform feature fusion, refer to section 1 to generate  `logmelspec`, `cqt` and  `gammatone` features and then train their respective models. Next, to generate the weights of each feature, run <br/>
 `python generate_weights.py -p 0 1 2 3 4` <br/>
+
 Finally, run <br/>
 `python feature_fusion.py -p 0 1 2 3 4` <br/>
