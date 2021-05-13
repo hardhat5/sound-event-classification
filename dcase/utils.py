@@ -52,8 +52,8 @@ class AudioDataset(Dataset):
         self.channel_means = np.load('./data/statistics/channel_means_{}.npy'.format(feature_type))
         self.channel_stds = np.load('./data/statistics/channel_stds_{}.npy'.format(feature_type))
 
-        self.channel_means = self.channel_means.reshape(1,1,-1)
-        self.channel_stds = self.channel_stds.reshape(1,1,-1)
+        self.channel_means = self.channel_means.reshape(1,-1,1)
+        self.channel_stds = self.channel_stds.reshape(1,-1,1)
 
     def __len__(self):
         return len(self.filenames)
@@ -68,9 +68,13 @@ class AudioDataset(Dataset):
         if self.resize:
             sample = self.resize(sample)
 
-        sample = sample.T
         sample = (sample-self.channel_means)/self.channel_stds
         sample = torch.Tensor(sample)
+
+        if self.spec_transform:
+            sample = self.spec_transform(sample)
+
+        sample = sample.transpose(0,1)
         
         if self.image_transform:
             # min-max transformation

@@ -54,13 +54,14 @@ def run(feature_type, num_frames, perm, seed):
     ])
 
     # Create the datasets and the dataloaders
-    train_dataset = AudioDataset(train_df, feature_type,
+
+    train_dataset = AudioDataset(train_df, feature_type=feature_type,
         perm=perm,
         resize = num_frames,
         image_transform = albumentations_transform,
         spec_transform = spec_transforms)
 
-    valid_dataset = AudioDataset(valid_df, feature_type, perm=perm, resize = num_frames)
+    valid_dataset = AudioDataset(valid_df, feature_type=feature_type, perm=perm, resize = num_frames)
 
     val_loader = DataLoader(valid_dataset, 16, shuffle=False, num_workers =2)
     train_loader = DataLoader(train_dataset, 16, shuffle=True, num_workers = 2)
