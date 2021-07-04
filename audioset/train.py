@@ -21,7 +21,7 @@ from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm, trange
 import random
 import argparse
-from utils import AudioDataset, Task5Model
+from utils import AudioDataset, Task5Model, mixup_data
 
 from augmentation.SpecTransforms import ResizeSpectrogram, TimeMask, FrequencyMask, RandomCycle
 
@@ -94,6 +94,8 @@ def run(feature_type, num_frames, perm, seed):
             inputs = sample['data'].to(device)
             label = sample['labels'].to(device)
 
+            inputs, y_a, y_b, lam = mixup_data(inputs, label, 1.0)
+
             optimizer.zero_grad()
             with torch.set_grad_enabled(True):
                 model = model.train()
@@ -110,7 +112,7 @@ def run(feature_type, num_frames, perm, seed):
             with torch.set_grad_enabled(False):
                 model = model.eval()
                 outputs = model(inputs)
-                loss = criterion(outputs, labels) 
+                loss = lam*criterion(outputs, y_a) + (1-lam)*criterion(outputs, y_b)
                 this_epoch_valid_loss += loss.detach().cpu().numpy()
 
         this_epoch_train_loss /= len(train_df)

@@ -51,23 +51,13 @@ class KDDataset(Dataset):
         return data
 
 def loss_fn_kd(outputs, labels, teacher_outputs, alpha, T):
-    """
-    Compute the knowledge-distillation (KD) loss given outputs, labels.
-    "Hyperparameters": temperature and alpha
-    NOTE: the KL Divergence for PyTorch comparing the softmaxs of teacher
-    and student expects the input tensor to be log probabilities! See Issue #2
-    """
+
     KD_loss = nn.KLDivLoss(reduction='batchmean')(F.log_softmax(outputs/T, dim=1),
                              F.softmax(teacher_outputs/T, dim=1)) * (alpha * T * T) + \
               F.cross_entropy(outputs, labels) * (1. - alpha)
 
     return KD_loss
 
-
-def l2_loss(pred, target):
-    target = Variable(target.data.cuda(), requires_grad=False)
-    l1 = nn.MSELoss()
-    return l1(pred, target)
 
 def run(feature_type, num_frames, perm, seed):
 
@@ -127,14 +117,11 @@ def run(feature_type, num_frames, perm, seed):
     print('Device: ', device)
     # Instantiate the model
     teacher = Task5Model(10).to(device)
-    model = Task5Model(10).to(device)
+    student = Task5Model(10).to(device)
 
-    teacher.load_state_dict(torch.load('./model/model_rev_{}_8k_{}'.format(feature_type, str(perm[0])+str(perm[1])+str(perm[2]))))
+    teacher.load_state_dict(torch.load('./model/model_{}_{}'.format(feature_type, str(perm[0])+str(perm[1])+str(perm[2]))))
     for param in teacher.parameters():
         param.requires_grad = False
-
-    model.load_state_dict(torch.load('./model/model_kd_{}_8k_{}'.format(feature_type, str(perm[0])+str(perm[1])+str(perm[2]))))
-
 
     # Define optimizer, scheduler and loss criteria
     optimizer = optim.Adam(model.parameters(), lr=0.001, amsgrad=True)
@@ -161,11 +148,10 @@ def run(feature_type, num_frames, perm, seed):
 
             optimizer.zero_grad()
             with torch.set_grad_enabled(True):
-                model = model.train()
-                outputs = model(inputs_8k)
+                student = student.train()
+                outputs = student(inputs_8k)
                 teacher_outputs = teacher(inputs).detach()
                 loss = loss_fn_kd(outputs, label, teacher_outputs, 0.01, T)
-                #loss = criterion(outputs, label) + 0.01*l2_loss(outputs, teacher_outputs)
                 loss.backward()
                 optimizer.step()
                 this_epoch_train_loss += loss.detach().cpu().numpy()
@@ -175,8 +161,8 @@ def run(feature_type, num_frames, perm, seed):
             inputs = sample['data_8k'].to(device)
             labels = sample['labels'].to(device)
             with torch.set_grad_enabled(False):
-                model = model.eval()
-                outputs = model(inputs)
+                student = student.eval()
+                outputs = student(inputs)
                 loss = criterion(outputs, labels) 
                 this_epoch_valid_loss += loss.detach().cpu().numpy()
 
@@ -188,7 +174,7 @@ def run(feature_type, num_frames, perm, seed):
 
         if this_epoch_valid_loss < lowest_val_loss:
             lowest_val_loss = this_epoch_valid_loss
-            torch.save(model.state_dict(), './model/model_kd2_{}_8k_{}'.format(feature_type, str(perm[0])+str(perm[1])+str(perm[2])))
+            torch.save(student.state_dict(), './model/model_kd_{}_8k_{}'.format(feature_type, str(perm[0])+str(perm[1])+str(perm[2])))
             epochs_without_new_lowest = 0
         else:
             epochs_without_new_lowest += 1

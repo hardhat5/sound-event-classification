@@ -30,7 +30,6 @@ class_mapping['others'] = 9
 
 random_erasing = RandomErasing()
 
-
 class AudioDataset(Dataset):
 
     def __init__(self, df, feature_type="logmelspec", perm=[0,1,2,3,4], spec_transform=None, image_transform=None, resize=None):
@@ -77,13 +76,6 @@ class AudioDataset(Dataset):
             this_min = sample.min()
             this_max = sample.max()
             sample = (sample - this_min) / (this_max - this_min)
-
-            # randomly cycle the file
-            i = np.random.randint(sample.shape[1])
-            sample = torch.cat([
-                sample[:, i:, :],
-                sample[:, :i, :]],
-                dim=1)
 
             # apply albumentations transforms
             sample = np.array(self.pil(sample))

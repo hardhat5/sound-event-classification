@@ -1,4 +1,4 @@
-# Sound Event Classification
+# Audioset
 
 This folder contains code to implement several sound event classification systems on a subset of Audioset and the corresponding telephony data. It contains the following implementations:
 1. DCASE 2019 Task 5 best performing system
@@ -9,7 +9,7 @@ This folder contains code to implement several sound event classification system
 ## Reproducing the results
 To reproduce the results, first clone this repository. Then, follow the steps below. 
 ### 1. Generating the features
-Generate the required type of feature using the scripts in the parent folder <br/>
+Generate the required type of feature using the scripts in the parent folder: <br/>
 `python compute_<feature_type>.py <input_path> <output_path>`<br/>
 Replace `<feature_type>` with one of `logmelspec`, `cqt`, `gammatone`. Make sure the output path is  `./audioset/data/<feature_type>`. 
 
@@ -33,12 +33,15 @@ In order to perform feature fusion, refer to the first point to generate  `logme
 Finally, run <br/>
 `python feature_fusion.py -p 0 1 2 3 4` <br/>
 
-7. Telephony data
+### 7. Mixup variants
+The code for two mixup variants (specmix and manifold mixup) is included in this folder. To evaluate specmix and manifold mixup, run `train_specmix.py` and `train_manifold_mixup.py`. The specmix function can be found in the `train_specmix.py` file. The modified MobileNetV2 model for manifold mixup can be found in `mixup_model.py`. The arguments to be passed are the same as step 3. 
+
+### 8. Telephony data
 To train on 8kHz telephony data, follow the same steps as above with the following differences:
 (a) The output folders for telephony features should be 
 `./audioset/data/<feature_type>_8k`
 (b) Simiarly, replace `<feature_type>` in the arguments passed for evaluating mean and stdev and training and testing with `<feature_type>_8k`.
 (c) Run `train_telephony.py` and `evaluate_telephony.py` instead of `train.py` and `evaluate.py`.
 
-8. Knowledge distillation
+### 9. Knowledge distillation
  

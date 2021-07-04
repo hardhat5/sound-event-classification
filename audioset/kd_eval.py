@@ -59,7 +59,7 @@ def run(feature_type, num_frames, perm):
     
     # Instantiate the model
     model = Task5Model(10).to(device)
-    model.load_state_dict(torch.load('./model/model_kd2_{}_{}'.format(feature_type, str(perm[0])+str(perm[1])+str(perm[2]))))
+    model.load_state_dict(torch.load('./model/model_kd_{}_8k_{}'.format(feature_type, str(perm[0])+str(perm[1])+str(perm[2]))))
 
     y_pred = []
     for sample in test_loader:

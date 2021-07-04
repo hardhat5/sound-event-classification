@@ -29,17 +29,19 @@ from augmentation.AudioTransforms import ResizeWaveform, NormalizeWaveform, Time
 
 def run():
     
-    fold0 = pd.read_csv('./data/split/fold_0.txt', delimiter=" ", header=None)
-    fold1 = pd.read_csv('./data/split/fold_1.txt', delimiter=" ", header=None)
-    fold2 = pd.read_csv('./data/split/fold_2.txt', delimiter=" ", header=None)
-    fold3 = pd.read_csv('./data/split/fold_3.txt', delimiter=" ", header=None)
-    fold4 = pd.read_csv('./data/split/fold_4.txt', delimiter=" ", header=None)
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
     
-    train_df = pd.concat([fold4, fold0, fold1])
-    valid_df = fold2
-    test_df = fold3
-
-    resize = transforms.Compose([ResizeSpectrogram(frames=636)])
+    folds = []
+    for i in range(5):
+        folds.append(pd.read_csv('./metadata/split/fold_{}.txt'.format(i), delimiter=" ", header=None))
+    
+    train_df = pd.concat([folds[perm[0]], folds[perm[1]], folds[perm[2]]])
+    valid_df = folds[perm[3]]
+    test_df = folds[perm[4]]
 
     spec_transforms = transforms.Compose([
         TimeMask(), 
@@ -48,33 +50,38 @@ def run():
     ])
 
     albumentations_transform = Compose([
-        # ShiftScaleRotate(shift_limit=0.1, scale_limit=0.1, rotate_limit=0.5),
-        # GridDistortion(),
+        ShiftScaleRotate(shift_limit=0.1, scale_limit=0.1, rotate_limit=0.5),
+        GridDistortion(),
         ToTensor()
     ])
 
     # Create the datasets and the dataloaders
-    train_dataset = AudioDataset3(train_df, path = './data/logmelspec/', 
-        resize = resize,
-        image_transform = albumentations_transform)
-        # spec_transform = spec_transforms)
 
-    # train_dataset = AudioDataset3(train_df, path = './data/logmelspec/', resize = resize,  spec_transform = spec_transforms)
-    valid_dataset = AudioDataset3(valid_df, path = './data/logmelspec/', resize = resize)
+    train_dataset = AudioDataset(train_df, feature_type=feature_type,
+        perm=perm,
+        resize = num_frames,
+        image_transform = albumentations_transform,
+        spec_transform = spec_transforms)
+
+    valid_dataset = AudioDataset(valid_df, feature_type=feature_type, perm=perm, resize = num_frames)
 
     val_loader = DataLoader(valid_dataset, 16, shuffle=False, num_workers =2)
     train_loader = DataLoader(train_dataset, 16, shuffle=True, num_workers = 2)
 
+    # Define the device to be used
+    cuda = True
+    device = torch.device('cuda:0' if cuda else 'cpu')
+    
+    print('Device: ', device)
     # Instantiate the model
-    model = MixupModel(9).to(device)
+    model = MixupModel(10).to(device)
 
     # Define optimizer, scheduler and loss criteria
-    # optimizer = optim.Adam(model.parameters(), lr=0.001, amsgrad=True)
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.001, momentum=0.9, weight_decay=1e-4, nesterov=True)
+    optimizer = optim.Adam(model.parameters(), lr=0.001, amsgrad=True)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=5, verbose=True)
     criterion = nn.CrossEntropyLoss()
 
-    epochs = 30
+    epochs = 50
     train_loss_hist = []
     valid_loss_hist = []
     lowest_val_loss = np.inf
@@ -117,7 +124,7 @@ def run():
 
         if this_epoch_valid_loss < lowest_val_loss:
             lowest_val_loss = this_epoch_valid_loss
-            torch.save(model.state_dict(), './data/model_system1_fold5')
+            torch.save(model.state_dict(), './model/model_{}_{}'.format(feature_type, str(perm[0])+str(perm[1])+str(perm[2])))
             epochs_without_new_lowest = 0
         else:
             epochs_without_new_lowest += 1
