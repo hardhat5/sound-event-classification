@@ -38,10 +38,11 @@ The code for two mixup variants (specmix and manifold mixup) is included in this
 
 ### 8. Telephony data
 To train on 8kHz telephony data, follow the same steps as above with the following differences:
-(a) The output folders for telephony features should be 
+1. The output folders for telephony features should be 
 `./audioset/data/<feature_type>_8k`
-(b) Simiarly, replace `<feature_type>` in the arguments passed for evaluating mean and stdev and training and testing with `<feature_type>_8k`.
-(c) Run `train_telephony.py` and `evaluate_telephony.py` instead of `train.py` and `evaluate.py`.
+2. Simiarly, replace `<feature_type>` in the arguments passed for evaluating mean and stdev and training and testing with `<feature_type>_8k`.
+3. Run `train_telephony.py` and `evaluate_telephony.py` instead of `train.py` and `evaluate.py`.
 
 ### 9. Knowledge distillation
+Make sure that models are first trained using high quality data (Step 3). Then, run `kd.py` to train models on 8k data using knowledge distillation. Run `kd_eval.py` to evaluate the models. 
  
